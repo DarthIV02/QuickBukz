@@ -3,16 +3,10 @@
 
 {% block content %}
     <h1> Create a New Survey </h1>
-    {% for number_questions in range(numquestions) %}
     <div class="row">
         <div class="col-md-4">
-            {{ wtf.quick_form(question_form) }}
+            {{ wtf.quick_form(form) }}
         </div>
-    </div>
-    {% endfor %}
-
-    <div class="col-md-4">
-            {{ wtf.quick_form(addrem_question) }}
     </div>
 
 {% endblock %}
