@@ -1,10 +1,11 @@
 from app import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
-from flask_login import UserMixin
+from flask_login import UserMixin, current_user
 from time import time
 import jwt
 from app import app, login
+from flask import session
 
 
 followers = db.Table(
@@ -96,7 +97,9 @@ class Question(db.Model):
         return f'<Question {self.id}>'
 
 @login.user_loader
-def load_user(id):
-    return User.query.get(int(id))
-
-
+def load_user(user_id):
+    # if session_part == 'Participant':
+    if session.get('account_type') == 'Participant':
+        return Participant.query.get(int(user_id))
+    else:
+        return Entrepeneur.query.get(int(user_id))
