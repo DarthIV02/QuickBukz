@@ -8,5 +8,4 @@ class Config(object):
     os.environ['FLASK_APP'] = "quickbucks.py"
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///' + os.path.join(basedir, 'app.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    questions = 1
 
