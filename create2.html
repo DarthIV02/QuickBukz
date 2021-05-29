@@ -8,11 +8,7 @@
     <div class="col-md-4">
         <form method="POST" action="">
         {{ form.hidden_tag() }}
-        {% for question in form.questions %}
-            {{ question }}
-        {% endfor %}
-        {{ form.addq }}
-        {{ form.remq }}
+
         {{ form.submit }}
     </form>
     </div>
