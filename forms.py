@@ -1,18 +1,27 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, TextAreaField, RadioField, \
-    DateField, SelectField, FileField
+    DateField, SelectField, FileField, FieldList, FormField, Form, IntegerField
 from wtforms.validators import DataRequired, ValidationError, Email, EqualTo, Length
 from wtforms.fields.html5 import DateField
+from app.models import User
 import pycountry
+from app import app
+from app.models import User
 
 class RegisterForm(FlaskForm):
-    type_of_user = RadioField(label='Type of Users', choices=[('participant', 'Participant'), ('entrepeneur', 'Entrepeneur')],
+    type_of_user = RadioField('Type of Users', choices=[('participant', 'Participant'), ('entrepeneur', 'Entrepeneur')],
                               validators=[DataRequired()])
         # 'valor para nosotros', 'lo que se despliega'
-    email = StringField(label='Email', validators=[DataRequired(), Email()])
-    password = PasswordField(label='Password', validators=[DataRequired()])
-    password2 = PasswordField(label='Repeat Password', validators=[DataRequired(), EqualTo('password')])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    password2 = PasswordField('Repeat Password', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Continue')
+
+    def validate_email(self, email):
+        user = User.query.filter_by(email=email.data).first()
+
+        if user is not None:
+            raise ValidationError('Please use a different email address.')
 
 
 class RegisterFormParticipant(FlaskForm):
@@ -35,8 +44,43 @@ class RegisterFormEntrepeneur(FlaskForm):
     logo = FileField(label='Logo')
     submit = SubmitField('Register')
 
+class ResetPasswordRequestForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    submit = SubmitField('Request Password Reset')
+
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField('Password', validators=[DataRequired()])
+    password2 = PasswordField(
+        'Repeat Password', validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('Request Password Reset')
+
 class LoginForm(FlaskForm):
-    email = StringField(label='Email', validators=[DataRequired()])
-    password = PasswordField(label='Password', validators=[DataRequired()])
-    remember_me = BooleanField(label='Remember Me')
+    email = StringField('email', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    remember_me = BooleanField('Remember Me')
     submit = SubmitField('Sign In')
+
+class CreateQuestion(Form):
+    question = StringField(label='Insert a question', validators=[DataRequired()])
+
+class NumberofQuestions(FlaskForm):
+    numofquestions = IntegerField(label='Insert the number of questions', validators=[DataRequired()])
+    # 
+
+class Questions(FlaskForm):
+    questions = FieldList(FormField(CreateQuestion), min_entries= 1)
+    addq = SubmitField(label='Add another question')
+    remq = SubmitField(label='Remove another question')
+    submit = SubmitField(label='Submit')
+
+class Add_RemoveQuestion(FlaskForm):
+    addq = SubmitField(label='Add another question')
+    remq = SubmitField(label='Remove another question')
+    submit = SubmitField(label='Submit')
+
+
+class AddOption(FlaskForm):
+    addop = SubmitField(label='Add Another Option')
+
+class Option(FlaskForm):
+    option = StringField(label='Option')
