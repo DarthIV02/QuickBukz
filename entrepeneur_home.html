@@ -2,4 +2,8 @@
 
 {% block content %}
     <h1>User: {{ user.email}}</h1>
+    <div>
+        <a href="{{ url_for('my_surveys') }}">My surveys</a>
+    </div>
+    <h1>My money: </h1>
 {% endblock %}
