@@ -6,7 +6,7 @@ from wtforms.fields.html5 import DateField
 from app.models import User
 import pycountry
 from app import app
-from app.models import User
+from app.models import Participant, Entrepeneur
 
 class RegisterForm(FlaskForm):
     type_of_user = RadioField('Type of Users', choices=[('participant', 'Participant'), ('entrepeneur', 'Entrepeneur')],
@@ -18,7 +18,10 @@ class RegisterForm(FlaskForm):
     submit = SubmitField('Continue')
 
     def validate_email(self, email):
-        user = User.query.filter_by(email=email.data).first()
+        if self.type_of_user == 'participant':
+            user = Participant.query.filter_by(email=email.data).first()
+        else:
+            user = Entrepeneur.query.filter_by(email=email.data).first()
 
         if user is not None:
             raise ValidationError('Please use a different email address.')
@@ -65,12 +68,12 @@ class CreateQuestion(Form):
 
 class NumberofQuestions(FlaskForm):
     numofquestions = IntegerField(label='Insert the number of questions', validators=[DataRequired()])
-    # 
+    # Add integer and min validators
+    submit = SubmitField(label='Submit')
 
 class Questions(FlaskForm):
+    global num_of_questions
     questions = FieldList(FormField(CreateQuestion), min_entries= 1)
-    addq = SubmitField(label='Add another question')
-    remq = SubmitField(label='Remove another question')
     submit = SubmitField(label='Submit')
 
 class Add_RemoveQuestion(FlaskForm):
