@@ -1,15 +1,34 @@
-{% import 'bootstrap/wtf.html' as wtf %}
-{% extends "base.html" %}
+{%  extends "base.html" %}
 
-{% block content %}
-    {{ form.hidden_tag() }}
+{% block app_content %}
     <h1> Create a New Survey </h1>
 
-    <div class="col-md-4">
-        <form method="POST" action="">
-        {{ form.hidden_tag() }}
+        <form method="post" action="{{ url_for('save_questions', num=num) }}">
+            {% for i in range(num) %}
+            <p id="question_field"+i>
+            {{ form.question.label }}
+            {{ form.question }} <br>
+            {{ form.op_1.label }}
+            {{ form.op_1 }} <br>
+            {{ form.op_2.label }}
+            {{ form.op_2 }} <br>
+            {{ form.op_3.label }}
+            {{ form.op_3 }}<br>
+            </p>
+            {% endfor %}
+            <br>
 
-        {{ form.submit }}
-    </form>
-    </div>
+            <p id="questions_added"></p>
+
+            <input type="submit" value="fix" onclick= "{{ url_for('create') }}"/>
+
+
+
+        </form>
+    <script type="text/javascript">
+        function add_question() {
+            let new_q = document.getElementById('question_field').innerHTML
+            document.getElementById('questions_added').innerHTML = new_q;
+        }
+    </script>
 {% endblock %}
