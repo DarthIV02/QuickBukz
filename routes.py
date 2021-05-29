@@ -1,14 +1,14 @@
 from app import app, db, principals, enter_permission
-from flask import render_template, flash, redirect, url_for, request, session
+from flask import render_template, flash, redirect, url_for, request, session, request
 from app.forms import RegisterForm, RegisterFormParticipant, RegisterFormEntrepeneur,\
     LoginForm, CreateQuestion, ResetPasswordRequestForm, ResetPasswordForm, Add_RemoveQuestion, \
     Option, AddOption, Questions, NumberofQuestions
-from app.models import Entrepeneur, Participant, User
+from app.models import Entrepeneur, Participant, User, Prize, Survey, Question
 from flask_login import current_user, login_user, logout_user, login_required
 
 from app.email import send_password_reset_email
 
-# app = Flask(__name__)
+    # app = Flask(__name__)
 @app.route('/')
 @app.route('/main_menu')
 def main_menu():
@@ -78,7 +78,6 @@ def login():
         else:
             if user == part_email:
                 session['account_type'] = 'Participant'
-                print(session)
                 login_user(user, remember=form.remember_me.data)
                 flash('Login requested for email {}, remember_me={}'.format(form.email.data, form.remember_me.data))
                 return redirect(url_for('home'))
@@ -99,36 +98,35 @@ def logout():
     logout_user()
     return redirect(url_for('main_menu'))
 
-@app.route('/create1', methods=['GET', 'POST'])
+@app.route('/create_0')
+def create_0():
+    pass
+
+@app.route('/create', methods=['GET', 'POST'])
 def create():
-    # numquestions = request.args.get('numquest', 3, type=int)
-    # question_form = CreateQuestion()
-    # addrem_question = Add_RemoveQuestion()
-    # form = Questions()
-    # if addrem_question.validate_on_submit():
-    #     if form.addq.data:
-    #         app.config['QUESTIONS'] = app.config['QUESTIONS']+1
-    #         return redirect(url_for('create'))
-    #     elif form.remq.data:
-    #         app.config['QUESTIONS'] = app.config['QUESTIONS']-1
-    #         return redirect(url_for('create'))
-    # return render_template('create2.html', title='Create Survey', question_form=question_form,
-    #                        numquestions=numquestions, addrem_question=addrem_question, form=form)
-    form = NumberofQuestions()
-    if form.validate_on_submit():
-        num_of_questions = form.numofquestions.data
-        return redirect(url_for('create2', num=num_of_questions))
-    return render_template('create.html', form=form)
+    num_of_questions = request.args.get('num_of_questions')
+    other_form=CreateQuestion()
+    return render_template('create2.html', num=int(num_of_questions), form=other_form)
+
 
 @app.route('/create2', methods=['GET', 'POST'])
 def create2():
-    # global num_of_questions
-    num_of_questions = request.args.get('num', 1, type=int)
-    print(num_of_questions)
-    form = Questions()
+    form = NumberofQuestions()
     if form.validate_on_submit():
-        pass
-    return render_template('create2.html', form=form, num_of_questions=num_of_questions)
+        return redirect(url_for('create', num_of_questions=form.numofquestions.data))
+    return render_template('create.html', form=form)
+
+@app.route('/save_questions', methods=['GET', 'POST'])
+def save_questions():
+    if request.method == 'POST':
+        preguntas = request.form
+        num = request.args.get('num')
+        print(preguntas['question'])
+        # s = Survey(id_entrepeneur=current_user.id, reward=5*num, develop_cost=10*num)
+        # for i in range(num):
+        #     q = Question(text=preguntas[0][1])
+
+        return render_template('resultados.html', resultado=preguntas)
 
 @app.route('/about_us', methods=['GET', 'POST'])
 def about_us():
@@ -192,10 +190,25 @@ def entrepeneur_home():
 
 @app.route('/available_surveys')
 def available_survey():
-    return "available surveys"
+#     surveys = Survey.query.join(
+# Participant, ((Participant.c.income == Survey.income_part) and (Survey.income_part != None))).filter(
+# followers.c.follower_id == self.id).order_by(
+# Post.timestamp.desc())
+    surveys = current_user.surveys_available()
+    return render_template('available_survey.html', surveys=surveys)
 
 @app.route('/my_surveys')
 def my_surveys():
-    return "My surveys"
+    pass
 
+@app.route('/my_stats')
+def my_stats():
+    return render_template('my_stats', title='stats')
+
+@app.route('/view_prizes', methods=['GET','POST'])
+def view_prizes():
+    if request.method == 'GET':
+        prizes = Prize.query.all()
+        print(prizes)
+        return render_template('view_prizes.html', prizes=prizes)
 
