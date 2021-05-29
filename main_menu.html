@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Hi, Welcome to QuickBuks!</h1>
+    <div>
+            Are you registered?:
+        <a href="{{ url_for('register') }}">Register</a>
+        {% if current_user.is_anonymous %}
+        <a href="{{ url_for('login') }}">Sign In</a>
+        {% else %}
+        <a href="{{ url_for('user', username=current_user.email) }}">Profile</a>
+        <a href="{{ url_for('logout') }}">Logout</a>
+        {% endif %}
+    </div>
+{% endblock %}
