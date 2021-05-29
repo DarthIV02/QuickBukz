@@ -1,8 +1,8 @@
-from app import app, db
+from app import app, db, principals, enter_permission
 from flask import render_template, flash, redirect, url_for, request, session
 from app.forms import RegisterForm, RegisterFormParticipant, RegisterFormEntrepeneur,\
     LoginForm, CreateQuestion, ResetPasswordRequestForm, ResetPasswordForm, Add_RemoveQuestion, \
-    Option, AddOption, Questions
+    Option, AddOption, Questions, NumberofQuestions
 from app.models import Entrepeneur, Participant, User
 from flask_login import current_user, login_user, logout_user, login_required
 
@@ -64,17 +64,34 @@ def login():
         return redirect(url_for('home'))
     form = LoginForm()
     if form.validate_on_submit():
-        user = db.session.query()
-        #user = User.query.filter_by(email=form.email.data).first()
-        if user is None or not user.check_password(form.password.data):
-            flash('Login requested for email {}, remember_me={}'.format(
-        form.email.data, form.remember_me.data))
-        return redirect(url_for('home'))
-        login_user(user, remember=form.remember_me.data)
-        next_page=request.args.get('next')
-        if not next_page or url_parse(next_page).netloc != '':
-            next_page = url_for('index')
-        return redirect(next_page)
+        username = form.email.data
+        part_email = Participant.query.filter_by(email=username).first()
+        ent_email = Entrepeneur.query.filter_by(email=username).first()
+        user = Participant.query.filter_by(email=username).first() or Entrepeneur.query.filter_by(email=username).first()
+
+        if (user is None):
+            flash('Wrong email, are you registered?')
+            return redirect(url_for('login'))
+        elif not user.check_password(form.password.data):
+            flash('Wrong password')
+            return redirect(url_for('login'))
+        else:
+            if user == part_email:
+                session['account_type'] = 'Participant'
+                print(session)
+                login_user(user, remember=form.remember_me.data)
+                flash('Login requested for email {}, remember_me={}'.format(form.email.data, form.remember_me.data))
+                return redirect(url_for('home'))
+            if user == ent_email:
+                session['account_type'] = 'Entrepeneur'
+                login_user(user, remember=form.remember_me.data)
+                flash('Login requested for email {}, remember_me={}'.format(form.email.data, form.remember_me.data))
+                return redirect(url_for('entrepeneur_home'))
+
+        # next_page=request.args.get('next')
+        # if not next_page or url_parse(next_page).netloc != '':
+        #     next_page = url_for('index')
+        # return redirect(next_page)
     return render_template('login.html',  title='Sign In', form=form)
 
 @app.route('/logout')
@@ -82,7 +99,7 @@ def logout():
     logout_user()
     return redirect(url_for('main_menu'))
 
-@app.route('/create', methods=['GET', 'POST'])
+@app.route('/create1', methods=['GET', 'POST'])
 def create():
     # numquestions = request.args.get('numquest', 3, type=int)
     # question_form = CreateQuestion()
@@ -97,9 +114,21 @@ def create():
     #         return redirect(url_for('create'))
     # return render_template('create2.html', title='Create Survey', question_form=question_form,
     #                        numquestions=numquestions, addrem_question=addrem_question, form=form)
-    
+    form = NumberofQuestions()
+    if form.validate_on_submit():
+        num_of_questions = form.numofquestions.data
+        return redirect(url_for('create2', num=num_of_questions))
+    return render_template('create.html', form=form)
 
-
+@app.route('/create2', methods=['GET', 'POST'])
+def create2():
+    # global num_of_questions
+    num_of_questions = request.args.get('num', 1, type=int)
+    print(num_of_questions)
+    form = Questions()
+    if form.validate_on_submit():
+        pass
+    return render_template('create2.html', form=form, num_of_questions=num_of_questions)
 
 @app.route('/about_us', methods=['GET', 'POST'])
 def about_us():
@@ -138,20 +167,35 @@ def reset_password(token):
         return redirect(url_for('login'))
     return render_template('reset_password.html', form=form)
 
-
+@app.route('/home', methods=['GET', 'POST'])
 @login_required
 def home():
-    return render_template("home.html", title='Home Page')
+    return render_template("home.html", title='Home Page', user=current_user)
 
-@app.route('/entrepeneur/<email>')
+@app.route('/entrepeneur_home', methods=['GET', 'POST'])
 @login_required
-def entrepeneur(email):
-    email = Entrepeneur.query.filter_by(email=email).first_or_404()
-    return render_template('entrepeneur_home.html', email=email)
+def entrepeneur_home():
+    return render_template("entrepeneur_home.html", title='E. Home Page', user=current_user)
 
-@app.route('/participant/<email>')
-@login_required
-def participant(email):
-    email = Participant.query.filter_by(email=email).first_or_404()
-    return render_template('home.html', email=email)
+
+# @app.route('/entrepeneur/<email>')
+# @login_required
+# def entrepeneur(email):
+#     email = Entrepeneur.query.filter_by(email=email).first_or_404()
+#     return render_template('entrepeneur_home.html', email=email)
+#
+# @app.route('/participant/<email>')
+# @login_required
+# def participant(email):
+#     email = Participant.query.filter_by(email=email).first_or_404()
+#     return render_template('home.html', email=email)
+
+@app.route('/available_surveys')
+def available_survey():
+    return "available surveys"
+
+@app.route('/my_surveys')
+def my_surveys():
+    return "My surveys"
+
 
