@@ -1,0 +1,19 @@
+{% import 'bootstrap/wtf.html' as wtf %}
+{% extends "base.html" %}
+
+{% block content %}
+    {{ form.hidden_tag() }}
+    <h1> Create a New Survey </h1>
+
+    <div class="col-md-4">
+        <form method="POST" action="">
+        {{ form.hidden_tag() }}
+        {% for question in form.questions %}
+            {{ question }}
+        {% endfor %}
+        {{ form.addq }}
+        {{ form.remq }}
+        {{ form.submit }}
+    </form>
+    </div>
+{% endblock %}
