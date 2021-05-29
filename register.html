@@ -1,10 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% import 'bootstrap/wtf.html' as wtf %}
+{% extends "base.html" %}
 
-</body>
-</html>
+{% block content %}
+    <h1> Register </h1>
+
+    <div class="row">
+            {{ wtf.quick_form(form) }}
+    </div>
+
+{% endblock %}
+
+<!-- Checar pagina 117 para checar si aparecen los errores -->
